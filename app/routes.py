@@ -4,6 +4,18 @@ from bokeh.embed import components
 from bokeh.plotting import figure
 
 import random
+import os
+from dotenv import load_dotenv
+import requests
+from datetime import datetime, timedelta
+import pandas as pd
+
+
+load_dotenv()
+
+GH_TOKEN = os.environ["GITHUB_TOKEN"]
+GH_USERNAME = os.environ["GITHUB_USERNAME"]
+
 
 @app.route('/')
 @app.route('/index')
@@ -84,3 +96,53 @@ def chartjs():
         data=data,
         labels=labels,
     )
+
+# @app.route('/github')
+def github_events():
+    headers = {
+        "accept": "application/vnd.github+json",
+        "authorization": f"Bearer {GH_TOKEN}",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+
+    api_url = "https://api.github.com"
+
+    user_events = f"{api_url}/users/{GH_USERNAME}/events"
+
+    response = requests.get(url=user_events, headers=headers)
+    response.raise_for_status()
+    events = response.json()
+
+    df = pd.json_normalize(events)
+
+
+
+    # return events
+
+github_events()
+
+
+
+# @app.route('/git-chart')
+# def chart_api():
+#     events = github_events()
+#     labels = [
+#         'CreateEvent',
+#         'PushEvent'
+#     ]
+#
+#     # for i in events:
+#     #     timestamp = i["created_at"]
+#     #     type = i["type"]
+#
+#     data = [i["type"].count() for i in events]
+
+
+
+    # return render_template(
+    #     template_name_or_list='chart-js.html',
+    #     data=data,
+    #     labels=labels,
+    # )
+
+
